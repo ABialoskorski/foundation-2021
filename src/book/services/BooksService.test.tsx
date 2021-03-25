@@ -1,6 +1,5 @@
 import { renderHook } from "@testing-library/react-hooks";
-import { act } from "react-dom/test-utils";
-import { useBooks } from "./BooksService";
+import { useLocalBooks } from "./useLocalBooks";
 import { Book } from "../book";
 
 const books = [
@@ -17,6 +16,9 @@ const books = [
 ];
 
 describe("BookService", () => {
+  beforeAll(() => {
+    jest.spyOn(console, "error").mockImplementation(() => {});
+  });
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -29,7 +31,7 @@ describe("BookService", () => {
       title: "Example Book",
     };
     // when
-    const { result } = renderHook(() => useBooks(books));
+    const { result } = renderHook(() => useLocalBooks());
     // then
     const findPromise = result.current.findAll().then((data) => {
       expect(data[0].id).toEqual(bookToCheck.id);
@@ -43,7 +45,7 @@ describe("BookService", () => {
     const bookToSave = { id: 1, authors: "Some author", title: "Some title" };
     const prevBook = books.find(({ id }) => id === bookToSave.id) as Book;
     // when
-    const { result } = renderHook(() => useBooks(books));
+    const { result } = renderHook(() => useLocalBooks());
     // then
     const findPromise = result.current.save(bookToSave).then((savedBook) => {
       // then
@@ -63,7 +65,7 @@ describe("BookService", () => {
       title: "Another Book",
     };
     // when
-    const { result } = renderHook(() => useBooks(books));
+    const { result } = renderHook(() => useLocalBooks());
     const findPromise = result.current.findOne(book.id).then((foundBook) => {
       // then
       expect(foundBook.id).toBe(book.id);
@@ -77,13 +79,14 @@ describe("BookService", () => {
     // given
     const bookToSave = { authors: "Some author", title: "Some title" };
     // when
-    act(() => {
-      const { result } = renderHook(() => useBooks(books));
-      const savedBook = result.current.saveNew(bookToSave);
+    const { result } = renderHook(() => useLocalBooks());
+    const findPromise = result.current.saveNew(bookToSave).then((savedBook) => {
       //then
       expect(savedBook.id).toBeDefined();
       expect(savedBook.authors).toBe(bookToSave.authors);
       expect(savedBook.title).toBe(bookToSave.title);
     });
+    jest.runAllTimers();
+    return findPromise;
   });
 });
