@@ -29,12 +29,13 @@ export const BookDetails = () => {
   const { id } = useParams<ParamTypes>();
   const { push } = useHistory();
   const methods = useForm({ defaultValues: initBook });
-  const { handleSubmit, errors, control, reset } = methods;
+  const { handleSubmit, errors, setValue, control } = methods;
 
   useEffect(() => {
     if (id) {
-      findOne(+id).then((book) => {
-        reset(book);
+      findOne(+id).then(({authors, title}) => {
+        setValue('authors', authors);
+        setValue('title', title);
       });
     }
   }, []);
