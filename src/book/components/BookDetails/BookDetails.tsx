@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useBookService } from "../../services/BooksService";
 import { BookProperties } from "../../book";
 import { Label } from "./BookDetails.css";
@@ -11,18 +11,16 @@ interface ErrorMessages {
   [key: string]: any;
 }
 
+interface ParamTypes {
+  id: string;
+}
+
 const errorMessages: ErrorMessages = {
   required: "This field is required",
   maxLength: "Your input exceed maximum length",
 };
 
-const ErrorMessage = ({ msg }: { msg: string }) => (
-  <div style={{ color: "red" }}>{msg}</div>
-);
-
-interface ParamTypes {
-  id: string;
-}
+const ErrorMessage = ({ msg }: { msg: string }) => <div style={{ color: "red" }}>{msg}</div>;
 
 const initBook: BookProperties = { title: "", authors: "" };
 
@@ -30,9 +28,8 @@ export const BookDetails = () => {
   const { save, saveNew, findOne } = useBookService();
   const { id } = useParams<ParamTypes>();
   const { push } = useHistory();
-  const { register, handleSubmit, errors, reset } = useForm({
-    defaultValues: initBook,
-  });
+  const methods = useForm({ defaultValues: initBook });
+  const { handleSubmit, errors, control, reset } = methods;
 
   useEffect(() => {
     if (id) {
@@ -49,20 +46,21 @@ export const BookDetails = () => {
       saveNew(data).then(() => push("/book-app/books"));
     }
   };
+
   return (
-    <div>
-      <form onSubmit={handleSubmit(notifyOnBookChange)}>
+      <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(notifyOnBookChange)} noValidate>
         <div className="form-group row">
           <Label htmlFor="authors" className="col-sm-3 col-form-label">
             Authors:
           </Label>
           <div className="col-sm-9">
-            <input
-              id="authors"
-              name="authors"
-              type="text"
-              className="form-control"
-              ref={register({ required: true })}
+            <Controller
+                control={control}
+                defaultValue=''
+                name='authors'
+                rules={{ required: true }}
+                render={(props) => <input {...{ ...props }} />}
             />
             {errors.authors && (
               <ErrorMessage msg={errorMessages[errors.authors.type]} />
@@ -74,12 +72,12 @@ export const BookDetails = () => {
             Title:
           </Label>
           <div className="col-sm-9">
-            <input
-              id="title"
-              name="title"
-              type="text"
-              className="form-control"
-              ref={register({ required: true, maxLength: 15 })}
+            <Controller
+                control={control}
+                defaultValue=''
+                name='title'
+                rules={{ required: true, maxLength:15 }}
+                render={(props) => <input {...{ ...props }} />}
             />
             {errors.title && (
               <ErrorMessage msg={errorMessages[errors.title.type]} />
@@ -92,6 +90,6 @@ export const BookDetails = () => {
           </div>
         </div>
       </form>
-    </div>
+    </FormProvider>
   );
 };
