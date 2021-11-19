@@ -50,6 +50,7 @@ export const BookDetails = () => {
 
   const checkData = () => {
     console.log(watch('authors'))
+    setValue('authors', 'ARTUR')
   };
 
   return (
