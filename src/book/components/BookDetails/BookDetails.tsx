@@ -29,7 +29,7 @@ export const BookDetails = () => {
   const { id } = useParams<ParamTypes>();
   const { push } = useHistory();
   const methods = useForm({ defaultValues: initBook });
-  const { handleSubmit, errors, setValue, control } = methods;
+  const { handleSubmit, errors, setValue, control, watch } = methods;
 
   useEffect(() => {
     if (id) {
@@ -48,6 +48,10 @@ export const BookDetails = () => {
     }
   };
 
+  const checkData = () => {
+    console.log(watch('authors'))
+  };
+
   return (
       <FormProvider {...methods}>
       <form onSubmit={handleSubmit(notifyOnBookChange)} noValidate>
@@ -61,7 +65,11 @@ export const BookDetails = () => {
                 defaultValue=''
                 name='authors'
                 rules={{ required: true }}
-                render={(props) => <input {...{ ...props }} />}
+                render={({onChange, ...rest}) => <input onChange={(e) => {
+                  console.log('hej');
+                  onChange(e)
+                }
+                } {...{ ...rest }} />}
             />
             {errors.authors && (
               <ErrorMessage msg={errorMessages[errors.authors.type]} />
@@ -88,6 +96,11 @@ export const BookDetails = () => {
         <div className="form-group row">
           <div className="offset-sm-3 col-sm-9">
             <button className="btn btn-primary">Apply</button>
+          </div>
+        </div>
+          <div className="form-group row">
+          <div className="offset-sm-3 col-sm-9">
+            <button className="btn btn-secondary" type='button' onClick={() => checkData()}>getAuthor</button>
           </div>
         </div>
       </form>
