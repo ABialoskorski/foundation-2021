@@ -2,19 +2,7 @@ import { renderHook } from "@testing-library/react-hooks";
 import { act } from "react-dom/test-utils";
 import { useBooks } from "./BooksService";
 import { Book } from "../book";
-
-const books = [
-  {
-    id: 1,
-    authors: "John Example",
-    title: "Example Book",
-  },
-  {
-    id: 2,
-    authors: "Joe Smith",
-    title: "Another Book",
-  },
-];
+import { mockBooks } from '../../mocks/books';
 
 describe("BookService", () => {
   beforeEach(() => {
@@ -29,7 +17,7 @@ describe("BookService", () => {
       title: "Example Book",
     };
     // when
-    const { result } = renderHook(() => useBooks(books));
+    const { result } = renderHook(() => useBooks(mockBooks));
     // then
     const findPromise = result.current.findAll().then((data) => {
       expect(data[0].id).toEqual(bookToCheck.id);
@@ -41,9 +29,9 @@ describe("BookService", () => {
     // given
     expect.hasAssertions();
     const bookToSave = { id: 1, authors: "Some author", title: "Some title" };
-    const prevBook = books.find(({ id }) => id === bookToSave.id) as Book;
+    const prevBook = mockBooks.find(({ id }) => id === bookToSave.id) as Book;
     // when
-    const { result } = renderHook(() => useBooks(books));
+    const { result } = renderHook(() => useBooks(mockBooks));
     // then
     const findPromise = result.current.save(bookToSave).then((savedBook) => {
       // then
@@ -63,7 +51,7 @@ describe("BookService", () => {
       title: "Another Book",
     };
     // when
-    const { result } = renderHook(() => useBooks(books));
+    const { result } = renderHook(() => useBooks(mockBooks));
     const findPromise = result.current.findOne(book.id).then((foundBook) => {
       // then
       expect(foundBook.id).toBe(book.id);
@@ -78,7 +66,7 @@ describe("BookService", () => {
     const bookToSave = { authors: "Some author", title: "Some title" };
     // when
     act(() => {
-      const { result } = renderHook(() => useBooks(books));
+      const { result } = renderHook(() => useBooks(mockBooks));
       const savedBook = result.current.saveNew(bookToSave);
       //then
       expect(savedBook.id).toBeDefined();
