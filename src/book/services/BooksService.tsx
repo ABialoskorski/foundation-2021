@@ -6,7 +6,7 @@ export interface BookService {
   findAll: () => Promise<Book[]>;
   findOne: (id: number) => Promise<Book>;
   save: (bookToSave: Book) => Promise<Book>;
-  saveNew: (book: BookProperties) => Book;
+  saveNew: (book: BookProperties) => Promise<Book>;
 }
 const dalay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -60,7 +60,7 @@ export const useBooks = (initial: Book[]) => {
       id: Math.max(0, Math.max(...books.map(({ id }) => id))) + 1,
     };
     setBooks([...books, savedBook]);
-    return savedBook;
+    return Promise.resolve(savedBook);
   };
 
   return {

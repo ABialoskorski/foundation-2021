@@ -4,6 +4,8 @@ import { Router } from "react-router-dom";
 import { BookOverview } from "./BookOverview";
 import { BookContext, BookService } from "../../services/BooksService";
 import { Book } from "../../book";
+import { Provider } from 'react-redux'
+import { store } from "../../store/store";
 
 describe("Book Overview Component", () => {
   beforeAll(() => {
@@ -31,11 +33,13 @@ describe("Book Overview Component", () => {
   } as BookService;
 
   const wrapper = ({ children }: any) => (
-    <Router history={history}>
-      <BookContext.Provider value={bookServiceMock}>
-        {children}
-      </BookContext.Provider>
-    </Router>
+    <Provider store={store}>
+      <Router history={history}>
+        <BookContext.Provider value={bookServiceMock}>
+          {children}
+        </BookContext.Provider>
+      </Router>
+    </Provider>
   );
 
   it("renders the master table having three columns", () => {
