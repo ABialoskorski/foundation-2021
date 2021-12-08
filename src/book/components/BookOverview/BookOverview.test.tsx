@@ -19,11 +19,27 @@ const mockedResponseBooks = [
   },
 ] 
 
+const mockFetch = async function mockFetch(url: string, config: Record<string, any>) {
+  switch (url) {
+    case getURI("books"): {
+      return {
+        ok: true,
+        json: async () => (mockedResponseBooks),
+      }
+    }
+    default: {
+      throw new Error(`Unhandled request: ${url}`)
+    }
+  }
+}
+
 describe("Book Overview with HTTP", () => {
   
   const history = createMemoryHistory();
 
+
   beforeAll(() => jest.spyOn(window, 'fetch'))
+  beforeEach(async () => await (window.fetch as any).mockImplementation(mockFetch))
 
   const Wrapper = ({ children }: any) => (
     <Router history={history}>
@@ -35,10 +51,10 @@ describe("Book Overview with HTTP", () => {
 
   test("Renders books table with data received from server", async () => {
 
-    await (window.fetch as any).mockResolvedValue({
-      ok: true,
-      json: async () => (mockedResponseBooks),
-    })
+    // await (window.fetch as any).mockResolvedValue({
+    //   ok: true,
+    //   json: async () => (mockedResponseBooks),
+    // })
 
     render(<BookOverview />, { wrapper: Wrapper });
     expect(await screen.findByText(/Julius Verne/i)).toBeInTheDocument()
