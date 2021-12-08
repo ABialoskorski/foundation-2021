@@ -11,7 +11,9 @@ export const BookOverview = () => {
   const { push } = useHistory();
 
   useEffect(() => {
-    findAll().then((books: Book[]) => setBooks(books));
+    findAll().then((books: Book[]) => {
+      setBooks(books)
+    })
   }, []);
 
   return (
