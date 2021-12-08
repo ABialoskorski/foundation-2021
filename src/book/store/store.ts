@@ -10,7 +10,7 @@ interface Action {
   payload: unknown;
 }
 
-const bookReducer = (state = initialState, action: Action) => {
+export const bookReducer = (state = initialState, action: Action) => {
   switch (action.type) {
     case 'UPDATE_BOOKS':
       return {

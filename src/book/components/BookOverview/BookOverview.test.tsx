@@ -4,6 +4,10 @@ import { Router } from "react-router-dom";
 import { BookOverview } from "./BookOverview";
 import { BookContext, BookService } from "../../services/BooksService";
 import { Book } from "../../book";
+import * as reactRedux from 'react-redux'
+import { Provider } from 'react-redux'
+import { store } from "../../store/store";
+import { mockBooks } from "../../../mocks/books"
 
 describe("Book Overview Component", () => {
   beforeAll(() => {
@@ -14,28 +18,19 @@ describe("Book Overview Component", () => {
   let bookServiceMockPromise: Promise<Book[]>;
   const bookServiceMock = {
     findAll() {
-      bookServiceMockPromise = Promise.resolve([
-        {
-          id: 1,
-          authors: "John Example",
-          title: "Example Book",
-        },
-        {
-          id: 2,
-          authors: "Joe Smith",
-          title: "Another Book",
-        },
-      ]);
+      bookServiceMockPromise = Promise.resolve(mockBooks);
       return bookServiceMockPromise;
     },
   } as BookService;
 
   const wrapper = ({ children }: any) => (
-    <Router history={history}>
-      <BookContext.Provider value={bookServiceMock}>
-        {children}
-      </BookContext.Provider>
-    </Router>
+    <Provider store={store}>
+      <Router history={history}>
+        <BookContext.Provider value={bookServiceMock}>
+          {children}
+        </BookContext.Provider>
+      </Router>
+    </Provider>
   );
 
   it("renders the master table having three columns", () => {
@@ -53,9 +48,9 @@ describe("Book Overview Component", () => {
     expect(authorsColumn).toBeInTheDocument();
     expect(titleColumn).toBeInTheDocument();
   });
+
   it("renders the master table rows", async () => {
     // given
-    expect.hasAssertions();
     act(() => {
       render(<BookOverview />, { wrapper });
     });
@@ -83,4 +78,37 @@ describe("Book Overview Component", () => {
       expect(history.push).toHaveBeenCalled();
     });
   });
+
+
+  describe("redux", () => {
+
+    let useDispatchMock: jest.SpyInstance;
+
+    beforeEach(() => {
+      useDispatchMock = jest.spyOn(reactRedux, 'useDispatch');
+    })
+
+    afterEach(() => {
+      useDispatchMock.mockClear();
+    })
+
+    it("gets books from store", () => {
+      const mockDispatch = jest.fn();
+      useDispatchMock.mockReturnValue(mockDispatch);
+      // given
+      act(() => {
+        render(<BookOverview />, { wrapper });
+        jest.runAllTimers();
+      });
+  
+      return bookServiceMockPromise.then(() => {
+        expect(mockDispatch).toHaveBeenCalled();
+        expect(mockDispatch).toHaveBeenCalledTimes(1);
+        expect(mockDispatch).toHaveBeenCalledWith({ type: 'UPDATE_BOOKS', payload: mockBooks });
+      })
+  
+    });
+  })
+
+
 });
