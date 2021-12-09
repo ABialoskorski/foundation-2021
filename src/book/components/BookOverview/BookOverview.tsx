@@ -2,19 +2,32 @@ import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Book } from "../../book";
 import { useBookService } from "../../services/BooksService";
+import { useQuery } from "react-query";
 
 export interface Props {}
 
 export const BookOverview = () => {
   const { findAll } = useBookService();
-  const [books, setBooks] = useState<Book[]>([]);
+  // const [books, setBooks] = useState<Book[]>([]);
   const { push } = useHistory();
 
-  useEffect(() => {
-    findAll().then((books: Book[]) => {
-      setBooks(books)
-    })
-  }, []);
+  // React Query
+  const { isLoading, error, data } = useQuery<Book[], Error>("bookList", findAll);
+
+  // // Apollo
+  // const { data } = useQuery(GET_BOOKS, {
+  //   fetchPolicy: 'network-only',
+  //   onError: (error) => console.log(error),
+  // });
+
+  // useEffect(() => {
+  //   findAll().then((books: Book[]) => {
+  //     setBooks(books)
+  //   })
+  // }, []);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>An error has occurred: " + {error.message}</div>;
 
   return (
     <div className="container">
@@ -29,7 +42,7 @@ export const BookOverview = () => {
               </tr>
             </thead>
             <tbody>
-              {books.map((book, index) => (
+              {data?.map((book, index) => (
                 <tr
                   key={book.id}
                   onClick={() => push(`/book-app/book/${book.id}`)}
