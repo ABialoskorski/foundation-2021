@@ -4,6 +4,63 @@ import { Router } from "react-router-dom";
 import { BookOverview } from "./BookOverview";
 import { BookContext, BookService } from "../../services/BooksService";
 import { Book } from "../../book";
+import { getURI, useRemoteBooks } from '../../services/useRemoteBooks';
+
+const mockedResponseBooks = [
+  {
+    id: 1,
+    authors: "Julius Verne",
+    title: "80 days around the world",
+  },
+  {
+    id: 2,
+    authors: "Joe Smith",
+    title: "Another Book",
+  },
+] 
+
+const mockFetch = async function mockFetch(url: string, config: Record<string, any>) {
+  switch (url) {
+    case getURI("books"): {
+      return {
+        ok: true,
+        json: async () => (mockedResponseBooks),
+      }
+    }
+    default: {
+      throw new Error(`Unhandled request: ${url}`)
+    }
+  }
+}
+
+describe("Book Overview with HTTP", () => {
+  
+  const history = createMemoryHistory();
+
+
+  beforeAll(() => jest.spyOn(window, 'fetch'))
+  beforeEach(async () => await (window.fetch as any).mockImplementation(mockFetch))
+
+  const Wrapper = ({ children }: any) => (
+    <Router history={history}>
+      <BookContext.Provider value={useRemoteBooks()}>
+        {children}
+      </BookContext.Provider>
+    </Router>
+  );
+
+  test("Renders books table with data received from server", async () => {
+
+    // await (window.fetch as any).mockResolvedValue({
+    //   ok: true,
+    //   json: async () => (mockedResponseBooks),
+    // })
+
+    render(<BookOverview />, { wrapper: Wrapper });
+    expect(await screen.findByText(/Julius Verne/i)).toBeInTheDocument()
+  })
+
+})
 
 describe("Book Overview Component", () => {
   beforeAll(() => {
@@ -30,7 +87,7 @@ describe("Book Overview Component", () => {
     },
   } as BookService;
 
-  const wrapper = ({ children }: any) => (
+  const Wrapper = ({ children }: any) => (
     <Router history={history}>
       <BookContext.Provider value={bookServiceMock}>
         {children}
@@ -41,7 +98,7 @@ describe("Book Overview Component", () => {
   it("renders the master table having three columns", () => {
     // given
     act(() => {
-      render(<BookOverview />, { wrapper });
+      render(<BookOverview />, { wrapper: Wrapper });
       jest.runAllTimers();
     });
     // when
@@ -57,7 +114,7 @@ describe("Book Overview Component", () => {
     // given
     expect.hasAssertions();
     act(() => {
-      render(<BookOverview />, { wrapper });
+      render(<BookOverview />, { wrapper: Wrapper });
     });
 
     // when
@@ -73,7 +130,7 @@ describe("Book Overview Component", () => {
     // given
     history.push = jest.fn();
     act(() => {
-      render(<BookOverview />, { wrapper });
+      render(<BookOverview />, { wrapper: Wrapper });
       jest.runAllTimers();
     });
     // when
