@@ -5,6 +5,7 @@ import {
   Route,
   Switch,
 } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { BookOverview } from "./book/components/BookOverview/BookOverview";
 import { BookDetails } from "./book/components/BookDetails/BookDetails";
 
@@ -51,9 +52,11 @@ export const Routes = () => (
 const App = () => (
   <Container>
     <BrowserRouter>
-      <BookProvider>
-        <Routes />
-      </BookProvider>
+      <QueryClientProvider client={new QueryClient()}>
+        <BookProvider>
+          <Routes />
+        </BookProvider>
+      </QueryClientProvider>
     </BrowserRouter>
   </Container>
 );

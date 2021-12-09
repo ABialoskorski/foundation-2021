@@ -2,7 +2,7 @@ import React, { createContext, useContext, FC } from "react";
 import { Book, BookProperties } from "../book";
 import { useLocalBooks } from "./useLocalBooks";
 import { useRemoteBooks } from "./useRemoteBooks";
-// import { useRemoteBooks } from './useRemoteBooks';
+import { useGraphqlBooks } from "./useGraphqlBooks";
 
 export interface BookService {
   findAll: () => Promise<Book[]>;
@@ -15,7 +15,7 @@ export const BookContext = createContext<BookService>({} as BookService);
 
 export const BookProvider: FC = (props) => {
   return (
-    <BookContext.Provider value={useRemoteBooks()}>
+    <BookContext.Provider value={useGraphqlBooks()}>
       {props.children}
     </BookContext.Provider>
   );
